@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — MercadoPlaza</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06060c;
+    --surface: #0e0e18;
+    --card: #141421;
+    --border: #222235;
+    --accent: #f0c040;
+    --accent2: #7c6dfa;
+    --text: #e8e8f0;
+    --muted: #6868a0;
+    --success: #36d987;
+    --danger: #ff5c5c;
+    --warning: #ffaa44;
+    --sidebar-w: 240px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── LOGIN SCREEN ── */
+  .login-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+
+  .login-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: .3rem;
+  }
+  .login-logo span { color: var(--accent); }
+
+  .login-subtitle {
+    color: var(--muted);
+    font-size: .85rem;
+    margin-bottom: 2rem;
+  }
+
+  .login-box .form-input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: .8rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    outline: none;
+    margin-bottom: 1rem;
+    transition: border-color .2s;
+  }
+  .login-box .form-input:focus { border-color: var(--accent2); }
+
+  .login-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    padding: .85rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #06060c;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .login-btn:hover { background: #f5d060; }
+
+  .login-error {
+    color: var(--danger);
+    font-size: .82rem;
+    margin-top: .8rem;
+    display: none;
+  }
+
+  .back-link {
+    display: block;
+    margin-top: 1.2rem;
+    color: var(--muted);
+    font-size: .82rem;
+    text-decoration: none;
+  }
+  .back-link:hover { color: var(--accent2); }
+
+  /* ── ADMIN LAYOUT ── */
+  #adminApp { display: none; width: 100%; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    min-height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+  }
+
+  .sidebar-logo {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo .brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+  }
+  .sidebar-logo .brand span { color: var(--accent); }
+
+  .sidebar-logo .admin-badge {
+    background: rgba(124,109,250,.2);
+    color: var(--accent2);
+    font-size: .65rem;
+    font-weight: 700;
+    padding: .15rem .5rem;
+    border-radius: 4px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-top: .3rem;
+    display: inline-block;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+  }
+
+  .nav-section {
+    padding: .5rem 1rem .3rem;
+    font-size: .65rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .7rem 1.2rem;
+    cursor: pointer;
+    transition: all .15s;
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--muted);
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { background: rgba(255,255,255,.04); color: var(--text); }
+  .nav-item.active {
+    background: rgba(124,109,250,.1);
+    color: var(--accent2);
+    border-left-color: var(--accent2);
+  }
+  .nav-item .nav-icon { font-size: 1rem; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--danger);
+    color: white;
+    font-size: .65rem;
+    font-weight: 700;
+    padding: .1rem .4rem;
+    border-radius: 100px;
+  }
+
+  .sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    font-size: .82rem;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    background: var(--accent2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: .75rem;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .logout-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: .75rem;
+    cursor: pointer;
+    margin-top: .3rem;
+    text-align: left;
+    padding: 0;
+    transition: color .2s;
+  }
+  .logout-btn:hover { color: var(--danger); }
+
+  /* MAIN CONTENT */
+  .admin-main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 2rem;
+    min-height: 100vh;
+    min-width: 0;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .page-header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .page-header p {
+    color: var(--muted);
+    font-size: .875rem;
+    margin-top: .2rem;
+  }
+
+  /* ── PANEL PAGES ── */
+  .panel-page { display: none; }
+  .panel-page.active { display: block; }
+
+  /* ── STAT CARDS ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.3rem 1.5rem;
+    transition: transform .2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); }
+
+  .stat-card-label {
+    font-size: .78rem;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+  }
+
+  .stat-card-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  .stat-card-sub {
+    font-size: .78rem;
+    color: var(--muted);
+    margin-top: .3rem;
+  }
+
+  .stat-card.gold .stat-card-num { color: var(--accent); }
+  .stat-card.purple .stat-card-num { color: var(--accent2); }
+  .stat-card.green .stat-card-num { color: var(--success); }
+  .stat-card.red .stat-card-num { color: var(--danger); }
+
+  /* ── TABLE ── */
+  .table-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .table-header {
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .8rem;
+  }
+
+  .table-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .table-search {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .45rem .9rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .82rem;
+    outline: none;
+    width: 220px;
+    transition: border-color .2s;
+  }
+  .table-search:focus { border-color: var(--accent2); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .85rem;
+  }
+
+  thead th {
+    padding: .75rem 1.5rem;
+    text-align: left;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,.02); }
+
+  tbody td {
+    padding: .9rem 1.5rem;
+    vertical-align: middle;
+  }
+
+  .td-emoji { font-size: 1.4rem; }
+
+  .td-name {
+    font-weight: 600;
+    font-size: .9rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .25rem .7rem;
+    border-radius: 100px;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+  .badge-active { background: rgba(54,217,135,.15); color: var(--success); }
+  .badge-pending { background: rgba(255,170,68,.15); color: var(--warning); }
+  .badge-removed { background: rgba(255,92,92,.15); color: var(--danger); }
+
+  .action-btns {
+    display: flex;
+    gap: .5rem;
+  }
+
+  .icon-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: .85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+  }
+  .icon-btn:hover { background: var(--border); color: var(--text); }
+  .icon-btn.danger:hover { background: var(--danger); color: white; border-color: var(--danger); }
+  .icon-btn.success:hover { background: var(--success); color: #06060c; border-color: var(--success); }
+
+  /* ── SETTINGS ── */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .settings-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+
+  .settings-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+    padding-bottom: .8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-label {
+    display: block;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: .4rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: .7rem .9rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .875rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent2); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .8rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+
+  .toggle-info strong {
+    display: block;
+    font-size: .875rem;
+    font-weight: 600;
+    margin-bottom: .2rem;
+  }
+  .toggle-info span { font-size: .78rem; color: var(--muted); }
+
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: transform .2s;
+  }
+  .toggle input:checked + .toggle-slider { background: var(--accent2); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  /* BTN */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .55rem 1.2rem;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    border: none;
+    text-decoration: none;
+  }
+  .btn-primary { background: var(--accent); color: #06060c; font-weight: 700; }
+  .btn-primary:hover { background: #f5d060; }
+  .btn-danger { background: rgba(255,92,92,.15); color: var(--danger); }
+  .btn-danger:hover { background: var(--danger); color: white; }
+  .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn-success { background: rgba(54,217,135,.15); color: var(--success); }
+  .btn-success:hover { background: var(--success); color: #06060c; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    backdrop-filter: blur(6px);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2rem;
+    animation: slideUp .25s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; }
+  .modal-close {
+    background: var(--card);
+    border: none;
+    color: var(--muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s;
+  }
+  .modal-close:hover { background: var(--danger); color: white; }
+
+  /* TOAST */
+  .toast-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: .7rem;
+  }
+  .toast {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: .9rem 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    font-size: .875rem;
+    min-width: 260px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.4);
+    animation: toastIn .3s ease;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast.error { border-left: 3px solid var(--danger); }
+  .toast.warning { border-left: 3px solid var(--warning); }
+
+  /* ── ACTIVITY LOG ── */
+  .activity-list { display: flex; flex-direction: column; gap: 0; }
+  .activity-item {
+    display: flex;
+    gap: 1rem;
+    padding: .9rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+    font-size: .85rem;
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: .35rem;
+    flex-shrink: 0;
+  }
+  .dot-green { background: var(--success); }
+  .dot-red { background: var(--danger); }
+  .dot-yellow { background: var(--warning); }
+  .dot-blue { background: var(--accent2); }
+  .activity-time { color: var(--muted); font-size: .75rem; margin-left: auto; white-space: nowrap; }
+
+  /* ── CATEGORIES ADMIN ── */
+  .cat-admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: .8rem;
+  }
+  .cat-admin-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+  }
+  .cat-admin-icon { font-size: 1.5rem; }
+  .cat-admin-name { font-weight: 600; font-size: .875rem; }
+  .cat-admin-count { font-size: .75rem; color: var(--muted); }
+  .cat-admin-actions { margin-left: auto; display: flex; gap: .3rem; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .admin-main { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">MERCADO<span>PLAZA</span></div>
+    <div class="login-subtitle">Panel de Administración</div>
+    <input class="form-input" id="loginUser" type="text" placeholder="Usuario administrador">
+    <input class="form-input" id="loginPass" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="login-btn" onclick="doLogin()">Entrar al panel</button>
+    <p class="login-error" id="loginError">❌ Credenciales incorrectas</p>
+    <a href="marketplace.html" class="back-link">← Volver al Marketplace</a>
+    <p style="color:var(--muted);font-size:.72rem;margin-top:1rem">Demo: usuario <strong>admin</strong> / contraseña <strong>admin123</strong></p>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">MERCADO<span>PLAZA</span></div>
+      <div class="admin-badge">Admin Panel</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" onclick="showPage('dashboard', this)">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('products', this)">
+        <span class="nav-icon">🛍️</span> Productos
+        <span class="nav-badge" id="pendingBadge" style="display:none">0</span>
+      </div>
+      <div class="nav-item" onclick="showPage('categories', this)">
+        <span class="nav-icon">🗂️</span> Categorías
+      </div>
+      <div class="nav-section">Gestión</div>
+      <div class="nav-item" onclick="showPage('activity', this)">
+        <span class="nav-icon">📋</span> Actividad
+      </div>
+      <div class="nav-section">Configuración</div>
+      <div class="nav-item" onclick="showPage('settings', this)">
+        <span class="nav-icon">⚙️</span> Configuración
+      </div>
+      <div class="nav-item" onclick="showPage('appearance', this)">
+        <span class="nav-icon">🎨</span> Apariencia
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">A</div>
+        <div>
+          <div style="font-size:.82rem;font-weight:600">Administrador</div>
+          <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="panel-page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p>Resumen general de MercadoPlaza</p>
+        </div>
+        <a href="marketplace.html" class="btn btn-outline" target="_blank">Ver sitio →</a>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card gold">
+          <div class="stat-card-label">Total productos</div>
+          <div class="stat-card-num" id="ds-total">0</div>
+          <div class="stat-card-sub">publicados activos</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-card-label">Vendedores únicos</div>
+          <div class="stat-card-num" id="ds-sellers">0</div>
+          <div class="stat-card-sub">registrados</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-card-label">Categorías usadas</div>
+          <div class="stat-card-num" id="ds-cats">0</div>
+          <div class="stat-card-sub">de 13 disponibles</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-card-label">Pendientes revisión</div>
+          <div class="stat-card-num" id="ds-pending">0</div>
+          <div class="stat-card-sub">esperando aprobación</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-title">Productos recientes</span>
+          <button class="btn btn-primary" onclick="showPage('products', document.querySelector('.nav-item:nth-child(3)'))">Ver todos</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Vendedor</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="recentProductsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── PRODUCTS ── -->
+    <div class="panel-page" id="page-products">
+      <div class="page-header">
+        <div>
+          <h1>Productos</h1>
+          <p>Gestiona todos los productos publicados</p>
+        </div>
+        <div style="display:flex;gap:.7rem">
+          <button class="btn btn-outline" onclick="exportCSV()">📥 Exportar CSV</button>
+          <button class="btn btn-primary" onclick="openModal('addProductModal')">+ Agregar</button>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-title">Todos los productos</span>
+          <input class="table-search" id="productSearch" type="text" placeholder="Buscar producto..." oninput="renderAdminProducts()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Vendedor</th>
+              <th>Contacto</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="adminProductsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── CATEGORIES ── -->
+    <div class="panel-page" id="page-categories">
+      <div class="page-header">
+        <div>
+          <h1>Categorías</h1>
+          <p>Administra las categorías del marketplace</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('addCatModal')">+ Nueva categoría</button>
+      </div>
+
+      <div class="table-card" style="padding:1.5rem">
+        <div class="cat-admin-grid" id="catAdminGrid"></div>
+      </div>
+    </div>
+
+    <!-- ── ACTIVITY ── -->
+    <div class="panel-page" id="page-activity">
+      <div class="page-header">
+        <div>
+          <h1>Actividad reciente</h1>
+          <p>Registro de acciones en el sistema</p>
+        </div>
+        <button class="btn btn-outline" onclick="clearActivity()">Limpiar registro</button>
+      </div>
+      <div class="table-card">
+        <div class="activity-list" id="activityList"></div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="panel-page" id="page-settings">
+      <div class="page-header">
+        <div>
+          <h1>Configuración</h1>
+          <p>Ajustes generales de la plataforma</p>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>🏪 Información del sitio</h3>
+          <div class="form-group">
+            <label class="form-label">Nombre del marketplace</label>
+            <input class="form-input" id="siteName" type="text" placeholder="MercadoPlaza">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-textarea" id="siteDesc" placeholder="Descripción breve del marketplace..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp de contacto</label>
+            <input class="form-input" id="siteWhatsApp" type="text" placeholder="+1 234 567 8900">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email de contacto</label>
+            <input class="form-input" id="siteEmail" type="text" placeholder="contacto@mercadoplaza.com">
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings()">Guardar cambios</button>
+        </div>
+
+        <div class="settings-card">
+          <h3>🔒 Seguridad</h3>
+          <div class="form-group">
+            <label class="form-label">Nueva contraseña admin</label>
+            <input class="form-input" id="newPass" type="password" placeholder="Nueva contraseña">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar contraseña</label>
+            <input class="form-input" id="confirmPass" type="password" placeholder="Repetir contraseña">
+          </div>
+          <button class="btn btn-primary" onclick="changePassword()">Cambiar contraseña</button>
+
+          <hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0">
+          <h3 style="font-size:.9rem;margin-bottom:1rem">⚙️ Funciones del sitio</h3>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Publicación libre</strong>
+              <span>Cualquiera puede publicar sin aprobación</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggleFreePublish" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Modo mantenimiento</strong>
+              <span>Deshabilita el acceso público</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggleMaintenance">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Mostrar botón Admin</strong>
+              <span>Muestra el acceso admin en el sitio</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggleAdminBtn" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3>🗑️ Zona de peligro</h3>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Eliminar todos los productos</strong>
+              <span>Borra el catálogo completo permanentemente</span>
+            </div>
+            <button class="btn btn-danger" onclick="confirmDeleteAll()">Eliminar todo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── APPEARANCE ── -->
+    <div class="panel-page" id="page-appearance">
+      <div class="page-header">
+        <div>
+          <h1>Apariencia</h1>
+          <p>Personaliza el aspecto visual del marketplace</p>
+        </div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>🎨 Colores</h3>
+          <div class="form-group">
+            <label class="form-label">Color de acento principal</label>
+            <div style="display:flex;gap:.7rem;align-items:center">
+              <input type="color" value="#f0c040" id="colorAccent" style="width:48px;height:36px;border:none;border-radius:8px;background:none;cursor:pointer">
+              <input class="form-input" value="#f0c040" id="colorAccentHex" style="flex:1" oninput="syncColor('accent')">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Color de acento secundario</label>
+            <div style="display:flex;gap:.7rem;align-items:center">
+              <input type="color" value="#7c6dfa" id="colorAccent2" style="width:48px;height:36px;border:none;border-radius:8px;background:none;cursor:pointer">
+              <input class="form-input" value="#7c6dfa" id="colorAccent2Hex" style="flex:1" oninput="syncColor('accent2')">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="showToast('Configuración guardada (aplica al recargar el sitio).','success')">Guardar</button>
+        </div>
+
+        <div class="settings-card">
+          <h3>🏷️ Textos del sitio</h3>
+          <div class="form-group">
+            <label class="form-label">Título Hero</label>
+            <input class="form-input" type="text" id="heroTitle" value="Vende tus productos, crece tu negocio">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Subtítulo Hero</label>
+            <textarea class="form-textarea" id="heroSub">La plataforma donde cualquier vendedor puede publicar sus productos y llegar a miles de compradores.</textarea>
+          </div>
+          <button class="btn btn-primary" onclick="saveTexts()">Guardar textos</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ADD PRODUCT MODAL -->
+<div class="modal-overlay" id="addProductModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="addProdTitle">Agregar producto</h2>
+      <button class="modal-close" onclick="closeModal('addProductModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre *</label>
+      <input class="form-input" id="ap-name" type="text">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción</label>
+      <textarea class="form-textarea" id="ap-desc"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="form-group">
+        <label class="form-label">Precio *</label>
+        <input class="form-input" id="ap-price" type="number">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Moneda</label>
+        <select class="form-select" id="ap-currency">
+          <option>USD</option><option>MXN</option><option>COP</option><option>ARS</option><option>PEN</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Categoría *</label>
+      <select class="form-select" id="ap-category"></select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="form-group">
+        <label class="form-label">Vendedor *</label>
+        <input class="form-input" id="ap-seller" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contacto</label>
+        <input class="form-input" id="ap-contact" type="text">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      <input class="form-input" id="ap-emoji" type="text" maxlength="4" placeholder="🛍️">
+    </div>
+    <input type="hidden" id="ap-editId">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:.8rem" onclick="saveAdminProduct()">Guardar producto</button>
+  </div>
+</div>
+
+<!-- ADD CAT MODAL -->
+<div class="modal-overlay" id="addCatModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h2 class="modal-title">Nueva categoría</h2>
+      <button class="modal-close" onclick="closeModal('addCatModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre de categoría</label>
+      <input class="form-input" id="nc-name" type="text" placeholder="Ej: Plantas y jardín">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji / ícono</label>
+      <input class="form-input" id="nc-icon" type="text" placeholder="🌱" maxlength="4">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:.8rem" onclick="saveNewCategory()">Crear categoría</button>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════
+//  STATE
+// ═══════════════════════════
+let adminPass = localStorage.getItem('mp_admin_pass') || 'admin123';
+let products = [];
+let categories = [];
+let activity = JSON.parse(localStorage.getItem('mp_activity') || '[]');
+const siteSettings = JSON.parse(localStorage.getItem('mp_settings') || '{}');
+
+const DEFAULT_CATS = [
+  { id: 'ropa', name: 'Ropa & Moda', icon: '👗' },
+  { id: 'electronica', name: 'Electrónica', icon: '📱' },
+  { id: 'hogar', name: 'Hogar', icon: '🏠' },
+  { id: 'alimentos', name: 'Alimentos', icon: '🍽️' },
+  { id: 'belleza', name: 'Belleza', icon: '💄' },
+  { id: 'deportes', name: 'Deportes', icon: '⚽' },
+  { id: 'vehiculos', name: 'Vehículos', icon: '🚗' },
+  { id: 'mascotas', name: 'Mascotas', icon: '🐾' },
+  { id: 'juguetes', name: 'Juguetes', icon: '🧸' },
+  { id: 'servicios', name: 'Servicios', icon: '🔧' },
+  { id: 'arte', name: 'Arte & Craft', icon: '🎨' },
+  { id: 'libros', name: 'Libros', icon: '📚' },
+  { id: 'otros', name: 'Otros', icon: '✨' },
+];
+
+// ═══════════════════════════
+//  LOGIN
+// ═══════════════════════════
+function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const adminPass = localStorage.getItem('mp_admin_pass') || 'admin123';
+  if (user === 'admin' && pass === adminPass) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'flex';
+    initAdmin();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function logout() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('adminApp').style.display = 'none';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').style.display = 'none';
+}
+
+// ═══════════════════════════
+//  INIT
+// ═══════════════════════════
+function initAdmin() {
+  products = JSON.parse(localStorage.getItem('mp_products') || '[]');
+  categories = JSON.parse(localStorage.getItem('mp_categories') || JSON.stringify(DEFAULT_CATS));
+  loadSettings();
+  renderDashboard();
+  renderAdminProducts();
+  renderAdminCategories();
+  renderActivity();
+  populateCategorySelect();
+}
+
+// ═══════════════════════════
+//  NAVIGATION
+// ═══════════════════════════
+function showPage(page, el) {
+  document.querySelectorAll('.panel-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  if (el) el.classList.add('active');
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'products') renderAdminProducts();
+  if (page === 'categories') renderAdminCategories();
+  if (page === 'activity') renderActivity();
+}
+
+// ═══════════════════════════
+//  DASHBOARD
+// ═══════════════════════════
+function renderDashboard() {
+  const sellers = [...new Set(products.map(p => p.seller))];
+  const cats = [...new Set(products.map(p => p.category))];
+  document.getElementById('ds-total').textContent = products.length;
+  document.getElementById('ds-sellers').textContent = sellers.length;
+  document.getElementById('ds-cats').textContent = cats.length;
+  document.getElementById('ds-pending').textContent = 0;
+
+  const tbody = document.getElementById('recentProductsTable');
+  const recent = [...products].sort((a, b) => b.date - a.date).slice(0, 6);
+  tbody.innerHTML = recent.map(p => {
+    const cat = categories.find(c => c.id === p.category) || { name: p.category, icon: '✨' };
+    return `
+      <tr>
+        <td class="td-emoji">${p.emoji || '🛍️'}</td>
+        <td class="td-name">${p.name}</td>
+        <td><span style="color:var(--muted);font-size:.82rem">${cat.icon} ${cat.name}</span></td>
+        <td style="font-weight:600;color:var(--accent)">${p.currency} ${parseFloat(p.price).toLocaleString()}</td>
+        <td style="font-size:.82rem">${p.seller}</td>
+        <td><span class="badge badge-active">● Activo</span></td>
+      </tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted)">Sin productos</td></tr>';
+}
+
+// ═══════════════════════════
+//  PRODUCTS TABLE
+// ═══════════════════════════
+function renderAdminProducts() {
+  const q = (document.getElementById('productSearch')?.value || '').toLowerCase();
+  const filtered = products.filter(p =>
+    !q || p.name.toLowerCase().includes(q) || p.seller.toLowerCase().includes(q)
+  );
+
+  const tbody = document.getElementById('adminProductsTable');
+  tbody.innerHTML = filtered.map(p => {
+    const cat = categories.find(c => c.id === p.category) || { name: p.category, icon: '✨' };
+    return `
+      <tr>
+        <td class="td-emoji">${p.emoji || '🛍️'}</td>
+        <td class="td-name">${p.name}</td>
+        <td style="font-size:.82rem;color:var(--muted)">${cat.icon} ${cat.name}</td>
+        <td style="font-weight:600;color:var(--accent)">${p.currency} ${parseFloat(p.price).toLocaleString()}</td>
+        <td style="font-size:.82rem">${p.seller}</td>
+        <td style="font-size:.78rem;color:var(--muted)">${p.contact || '—'}</td>
+        <td><span class="badge badge-active">● Activo</span></td>
+        <td>
+          <div class="action-btns">
+            <button class="icon-btn success" onclick="editProduct('${p.id}')" title="Editar">✏️</button>
+            <button class="icon-btn danger" onclick="deleteProduct('${p.id}')" title="Eliminar">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--muted)">No hay productos</td></tr>';
+}
+
+function editProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('addProdTitle').textContent = 'Editar producto';
+  document.getElementById('ap-name').value = p.name;
+  document.getElementById('ap-desc').value = p.desc;
+  document.getElementById('ap-price').value = p.price;
+  document.getElementById('ap-currency').value = p.currency;
+  document.getElementById('ap-category').value = p.category;
+  document.getElementById('ap-seller').value = p.seller;
+  document.getElementById('ap-contact').value = p.contact;
+  document.getElementById('ap-emoji').value = p.emoji;
+  document.getElementById('ap-editId').value = id;
+  openModal('addProductModal');
+}
+
+function saveAdminProduct() {
+  const editId = document.getElementById('ap-editId').value;
+  const name = document.getElementById('ap-name').value.trim();
+  const price = document.getElementById('ap-price').value;
+  const seller = document.getElementById('ap-seller').value.trim();
+  if (!name || !price || !seller) { showToast('Rellena los campos requeridos', 'error'); return; }
+
+  if (editId) {
+    const idx = products.findIndex(p => p.id === editId);
+    if (idx !== -1) {
+      products[idx] = { ...products[idx], name, desc: document.getElementById('ap-desc').value, price: parseFloat(price), currency: document.getElementById('ap-currency').value, category: document.getElementById('ap-category').value, seller, contact: document.getElementById('ap-contact').value, emoji: document.getElementById('ap-emoji').value || '🛍️' };
+      logActivity('✏️', `Producto editado: "${name}"`, 'blue');
+    }
+  } else {
+    products.unshift({ id: 'a' + Date.now(), name, desc: document.getElementById('ap-desc').value, price: parseFloat(price), currency: document.getElementById('ap-currency').value, category: document.getElementById('ap-category').value, seller, contact: document.getElementById('ap-contact').value, emoji: document.getElementById('ap-emoji').value || '🛍️', date: Date.now() });
+    logActivity('✅', `Producto agregado: "${name}"`, 'green');
+  }
+
+  saveProducts();
+  renderAdminProducts();
+  renderDashboard();
+  closeModal('addProductModal');
+  document.getElementById('ap-editId').value = '';
+  document.getElementById('addProdTitle').textContent = 'Agregar producto';
+  showToast('Producto guardado.', 'success');
+}
+
+function deleteProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!confirm(`¿Eliminar "${p?.name}"?`)) return;
+  products = products.filter(x => x.id !== id);
+  saveProducts();
+  renderAdminProducts();
+  renderDashboard();
+  logActivity('🗑️', `Producto eliminado: "${p?.name}"`, 'red');
+  showToast('Producto eliminado.', 'error');
+}
+
+function confirmDeleteAll() {
+  if (!confirm('⚠️ ¿Eliminar TODOS los productos? Esta acción no se puede deshacer.')) return;
+  products = [];
+  saveProducts();
+  renderAdminProducts();
+  renderDashboard();
+  logActivity('💥', 'Todos los productos fueron eliminados', 'red');
+  showToast('Todos los productos eliminados.', 'error');
+}
+
+function exportCSV() {
+  const header = 'Nombre,Categoría,Precio,Moneda,Vendedor,Contacto\n';
+  const rows = products.map(p => `"${p.name}","${p.category}",${p.price},"${p.currency}","${p.seller}","${p.contact}"`).join('\n');
+  const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mercadoplaza_productos.csv';
+  a.click();
+  showToast('CSV exportado.', 'success');
+}
+
+// ═══════════════════════════
+//  CATEGORIES
+// ═══════════════════════════
+function renderAdminCategories() {
+  const counts = {};
+  products.forEach(p => { counts[p.category] = (counts[p.category] || 0) + 1; });
+
+  document.getElementById('catAdminGrid').innerHTML = categories.map(c => `
+    <div class="cat-admin-card">
+      <div class="cat-admin-icon">${c.icon}</div>
+      <div>
+        <div class="cat-admin-name">${c.name}</div>
+        <div class="cat-admin-count">${counts[c.id] || 0} productos</div>
+      </div>
+      <div class="cat-admin-actions">
+        <button class="icon-btn danger" onclick="deleteCategory('${c.id}')" title="Eliminar">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function saveNewCategory() {
+  const name = document.getElementById('nc-name').value.trim();
+  const icon = document.getElementById('nc-icon').value.trim() || '📦';
+  if (!name) { showToast('Escribe un nombre', 'error'); return; }
+  const id = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+  categories.push({ id, name, icon });
+  localStorage.setItem('mp_categories', JSON.stringify(categories));
+  populateCategorySelect();
+  renderAdminCategories();
+  closeModal('addCatModal');
+  document.getElementById('nc-name').value = '';
+  document.getElementById('nc-icon').value = '';
+  logActivity('🗂️', `Categoría creada: "${name}"`, 'blue');
+  showToast('Categoría creada.', 'success');
+}
+
+function deleteCategory(id) {
+  const cat = categories.find(c => c.id === id);
+  if (!confirm(`¿Eliminar categoría "${cat?.name}"?`)) return;
+  categories = categories.filter(c => c.id !== id);
+  localStorage.setItem('mp_categories', JSON.stringify(categories));
+  renderAdminCategories();
+  populateCategorySelect();
+  logActivity('🗑️', `Categoría eliminada: "${cat?.name}"`, 'red');
+  showToast('Categoría eliminada.', 'error');
+}
+
+function populateCategorySelect() {
+  const sel = document.getElementById('ap-category');
+  if (!sel) return;
+  sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+}
+
+// ═══════════════════════════
+//  ACTIVITY
+// ═══════════════════════════
+function logActivity(icon, msg, color) {
+  activity.unshift({ icon, msg, color, time: Date.now() });
+  if (activity.length > 50) activity.pop();
+  localStorage.setItem('mp_activity', JSON.stringify(activity));
+}
+
+function renderActivity() {
+  const list = document.getElementById('activityList');
+  if (!activity.length) {
+    list.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--muted)">Sin actividad registrada</div>';
+    return;
+  }
+  list.innerHTML = activity.map(a => `
+    <div class="activity-item">
+      <div class="activity-dot dot-${a.color}"></div>
+      <span>${a.icon} ${a.msg}</span>
+      <span class="activity-time">${timeAgo(a.time)}</span>
+    </div>
+  `).join('');
+}
+
+function clearActivity() {
+  activity = [];
+  localStorage.setItem('mp_activity', '[]');
+  renderActivity();
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  if (diff < 60000) return 'ahora';
+  if (diff < 3600000) return Math.floor(diff / 60000) + ' min';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + 'h';
+  return Math.floor(diff / 86400000) + 'd';
+}
+
+// ═══════════════════════════
+//  SETTINGS
+// ═══════════════════════════
+function loadSettings() {
+  if (siteSettings.siteName) document.getElementById('siteName').value = siteSettings.siteName;
+  if (siteSettings.siteDesc) document.getElementById('siteDesc').value = siteSettings.siteDesc;
+  if (siteSettings.whatsapp) document.getElementById('siteWhatsApp').value = siteSettings.whatsapp;
+  if (siteSettings.email) document.getElementById('siteEmail').value = siteSettings.email;
+}
+
+function saveSettings() {
+  siteSettings.siteName = document.getElementById('siteName').value;
+  siteSettings.siteDesc = document.getElementById('siteDesc').value;
+  siteSettings.whatsapp = document.getElementById('siteWhatsApp').value;
+  siteSettings.email = document.getElementById('siteEmail').value;
+  localStorage.setItem('mp_settings', JSON.stringify(siteSettings));
+  logActivity('⚙️', 'Configuración del sitio actualizada', 'blue');
+  showToast('Configuración guardada.', 'success');
+}
+
+function changePassword() {
+  const np = document.getElementById('newPass').value;
+  const cp = document.getElementById('confirmPass').value;
+  if (!np) { showToast('Escribe la nueva contraseña', 'error'); return; }
+  if (np !== cp) { showToast('Las contraseñas no coinciden', 'error'); return; }
+  localStorage.setItem('mp_admin_pass', np);
+  document.getElementById('newPass').value = '';
+  document.getElementById('confirmPass').value = '';
+  logActivity('🔒', 'Contraseña de admin actualizada', 'yellow');
+  showToast('Contraseña actualizada.', 'success');
+}
+
+function saveTexts() {
+  siteSettings.heroTitle = document.getElementById('heroTitle').value;
+  siteSettings.heroSub = document.getElementById('heroSub').value;
+  localStorage.setItem('mp_settings', JSON.stringify(siteSettings));
+  showToast('Textos guardados.', 'success');
+}
+
+function syncColor(which) { /* color sync */ }
+
+// ═══════════════════════════
+//  HELPERS
+// ═══════════════════════════
+function saveProducts() { localStorage.setItem('mp_products', JSON.stringify(products)); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+function showToast(msg, type = 'success') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+</script>
+</body>
+</html>
+
